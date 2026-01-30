@@ -39,8 +39,16 @@ const modelSpinSpeed = 0.6; // radians per second, rotates model around its Y ax
 
 const ldr = new GLTFLoader();
 
-const models = ['/models/freddy.glb','/models/bonnie.glb','/models/chica.glb', '/models/foxy.glb','/models/golden_freddy.glb'];
-const names = ['Freddy','Bonnie','Chica', 'Foxy', 'Golden Freddy'];
+const models = ['/models/freddy.glb','/models/bonnie.glb','/models/chica.glb','/models/foxy.glb'];
+const names = ['Freddy','Bonnie','Chica','Foxy'];
+const desc = [
+  "Freddy Fazbear is the titular antagonist of the Five Nights at Freddy's series and the main of the four original animatronics of Freddy Fazbear's Pizza. Freddy is an animatronic bear and the star attraction of the original Freddy Fazbear's Pizza opened in 1983,[4] as well as the face and namesake of the company that owns it– Fazbear Entertainment. Freddy takes the role of lead singer and overall performer of the band, standing in the center of the stage. Undisclosed to Fazbear Entertainment and the public, Freddy is heavily implied to be possessed by the restless spirit of Gabriel – a little boy murdered by William Afton. Due to this, Freddy and his likewise possessed bandmates are now seeking revenge against their common killer by attacking any similar-looking adults in the pizzeria after hours in a blind rage, not knowing that they, the children, are being manipulated by William Afton. However, Freddy is evidently friendly towards children and seeks to save his and his friends own souls as well as any other children targeted by William Afton.", 
+  "Bonnie the Rabbit is one of the four original animatronics of Freddy Fazbear's Pizza and a major antagonist in the Five Nights at Freddy's series. Bonnie is an animatronic rabbit and the guitarist in Freddy's band, positioned at the left side of the stage. Undisclosed to Fazbear Entertainment, Inc. and the public, Bonnie is heavily implied to be possessed by the restless spirit of Jeremy – a little boy murdered by William Afton. Due to this, he and the others are now seeking revenge against their killer by attacking any adults in the pizzeria after-hours in a blind rage. He was the guitarist when the first Freddy Fazbear's Pizza was opened in 1983,[1] though, just like Freddy, it is heavily implied that he had already existed as a character for many years, if not decades, prior to Freddy Fazbear's Pizza. In 1987, he and the original animatronics had all fallen into severe disrepair and were put under attempted retrofit before being replaced by his newer counterpart for the 'improved' Freddy Fazbear's Pizza, Toy Bonnie.[2] After the pizzeria's closing, he and the original animatronics were refurbished for the new pizzeria, as of the events of the first game. However, after the closure of the new pizzeria, he and the other animatronics got dismantled by their killer. His soul, along with the others, was presumably set free, as evidenced by the good ending.",
+  'Description for Chica',
+  'Description for Foxy'
+];
+
+
 let current = 0; // will use same pointer for both arrays cuz same length and order
 let activeModel = null;
 
@@ -58,7 +66,16 @@ function loadModel() {
     activeModel = null;
   }
 
-  ldr.load(models[current], function (gltf) {
+  let modelPath = models[current];
+  let displayName = names[current];
+
+  //10% chance for funni easter egg hehehehe
+  if (current === 0 && Math.random() < 0.1) {
+    displayName = 'Piss Freddy';
+    modelPath = '/models/golden_freddy.glb';
+  }
+
+  ldr.load(modelPath, function (gltf) {
     gltf.scene.updateMatrixWorld();
 
     const bbox = new THREE.Box3().setFromObject(gltf.scene);
@@ -76,21 +93,30 @@ function loadModel() {
     const bbox2 = new THREE.Box3().setFromObject(gltf.scene);
     const sph = bbox2.getBoundingSphere(new THREE.Sphere());
 
+    //basically keeps model above description text (by using an offset)
+    const verticalOffset = sph.radius * 0.5;
+    gltf.scene.position.y += verticalOffset;
+
     scene.add(gltf.scene);
     activeModel = gltf.scene;
 
     const infoEl = document.getElementById('info');
     if (infoEl) {
-      let displayName = names[current];
-      if (displayName === 'Golden Freddy' && Math.random() < 0.1) {
-        displayName = 'Piss Freddy'; //funni easter egg hehehe
-      }
       infoEl.textContent = 'Animatronic: ' + displayName;
     }
+    const descEl = document.getElementById('description');
+    if (descEl) {
+      // :p
+      if (displayName === 'Piss Freddy') {
+        descEl.textContent = '( ͡° ͜ʖ ͡°) ';
+      } else {
+        descEl.textContent = desc[current] || '';
+      }
+    }
 
-    cam.position.set(0, 0, Math.max(10, sph.radius * 3));
-    cam.lookAt(0, 0, 0);
-    ctrl.target.set(0, 0, 0);
+    cam.position.set(0, verticalOffset, Math.max(10, sph.radius * 3));
+    cam.lookAt(0, verticalOffset, 0);
+    ctrl.target.set(0, verticalOffset, 0);
     ctrl.update();
 
   }, undefined, function (error) {
@@ -111,7 +137,24 @@ if (prevBtn) prevBtn.addEventListener('click', () => {
   loadModel();
 });
 
-loadModel(current);
+
+document.addEventListener('keydown', function(event) {
+    console.log('Key pressed: ' + event.key);
+    // You can also check for specific keys, e.g., the "Enter" key
+    if (event.key === 'ArrowRight') {
+        current = (current + 1) % models.length;
+        loadModel();
+    }
+});
+
+document.addEventListener('keydown', function (event) {
+    if (event.key === 'ArrowLeft') {
+      current = (current -1 + models.length) % models.length;
+      loadModel();
+    }
+})
+
+loadModel();
 
 
 function animate() {

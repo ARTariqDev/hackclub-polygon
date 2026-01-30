@@ -21,18 +21,14 @@ body {
   right: 20px;
   z-index: 1002;
   pointer-events: auto;
-  background: linear-gradient(135deg, #ff6b6b 0%, #ffca3a 100%);
+  background: tomato;
   color: #111;
   border: none;
   padding: 10px 16px;
   font-size: 15px;
   font-weight: 700;
   border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
 }
 
 #next:hover {
@@ -57,7 +53,7 @@ body {
   left: 20px;
   z-index: 1002;
   pointer-events: auto;
-  background: linear-gradient(135deg, #8ec5ff 0%, #6a82fb 100%);
+  background: blue;
   color: #111;
   border: none;
   padding: 10px 16px;
@@ -66,9 +62,6 @@ body {
   border-radius: 10px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
   cursor: pointer;
-  transition: transform .12s ease, box-shadow .12s ease, opacity .12s;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
 }
 
 #prev:hover {
@@ -87,12 +80,24 @@ body {
   border-radius: 10px;
 }
 
-@media (max-width: 480px) {
-  #next, #prev {
-    top: 12px;
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-  #next { right: 12px; }
-  #prev { left: 12px; }
+
+#description {
+  color: #fff;
+  position: absolute;
+  bottom: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 680px;
+  width: calc(100% - 40px);
+  padding: 8px 14px;
+  text-align: center;
+  z-index: 1001;
+  background: rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+  transition: opacity .18s ease, transform .18s ease;
+  opacity: 0.98;
 }
