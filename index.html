@@ -10,10 +10,16 @@
   <body>
     <div id="app"></div>
     <div id="info">Animatronic: </div>
-    <div id="next"> next</div>
-    <div id="prev"> prev</div>
+    <div id="tip">You can use the A/D Keys ad arrow keys to cycle between models</div>
+    <iframe id="jumpframe" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     <div id="description">
-       
+        <div class="controls">
+            <button id="prev">←</button>
+            <button id="jumpscare">▶</button>
+            <button id="next">→</button>
+        </div>
+        <button id="showDesc">Show Description</button>
+        <p id="content"></p>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>

@@ -12,7 +12,13 @@ ren.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(ren.domElement);
 
 
-scene.background = new THREE.Color(0x000000);
+const texLoader = new THREE.TextureLoader();
+texLoader.load('/bg.jpg', (tex) => {
+  tex.encoding = THREE.sRGBEncoding;
+  scene.background = tex;
+}, undefined, (err) => {
+  console.error('Failed to load background image', err);
+});
 
 const amb = new THREE.AmbientLight(0xffffff, 0.6);
 scene.add(amb);
@@ -41,12 +47,26 @@ const ldr = new GLTFLoader();
 
 const models = ['/models/freddy.glb','/models/bonnie.glb','/models/chica.glb','/models/foxy.glb'];
 const names = ['Freddy','Bonnie','Chica','Foxy'];
+
 const desc = [
+  // descriptions are from https://freddy-fazbears-pizza.fandom.com/wiki/
   "Freddy Fazbear is the titular antagonist of the Five Nights at Freddy's series and the main of the four original animatronics of Freddy Fazbear's Pizza. Freddy is an animatronic bear and the star attraction of the original Freddy Fazbear's Pizza opened in 1983,[4] as well as the face and namesake of the company that owns it– Fazbear Entertainment. Freddy takes the role of lead singer and overall performer of the band, standing in the center of the stage. Undisclosed to Fazbear Entertainment and the public, Freddy is heavily implied to be possessed by the restless spirit of Gabriel – a little boy murdered by William Afton. Due to this, Freddy and his likewise possessed bandmates are now seeking revenge against their common killer by attacking any similar-looking adults in the pizzeria after hours in a blind rage, not knowing that they, the children, are being manipulated by William Afton. However, Freddy is evidently friendly towards children and seeks to save his and his friends own souls as well as any other children targeted by William Afton.", 
   "Bonnie the Rabbit is one of the four original animatronics of Freddy Fazbear's Pizza and a major antagonist in the Five Nights at Freddy's series. Bonnie is an animatronic rabbit and the guitarist in Freddy's band, positioned at the left side of the stage. Undisclosed to Fazbear Entertainment, Inc. and the public, Bonnie is heavily implied to be possessed by the restless spirit of Jeremy – a little boy murdered by William Afton. Due to this, he and the others are now seeking revenge against their killer by attacking any adults in the pizzeria after-hours in a blind rage. He was the guitarist when the first Freddy Fazbear's Pizza was opened in 1983,[1] though, just like Freddy, it is heavily implied that he had already existed as a character for many years, if not decades, prior to Freddy Fazbear's Pizza. In 1987, he and the original animatronics had all fallen into severe disrepair and were put under attempted retrofit before being replaced by his newer counterpart for the 'improved' Freddy Fazbear's Pizza, Toy Bonnie.[2] After the pizzeria's closing, he and the original animatronics were refurbished for the new pizzeria, as of the events of the first game. However, after the closure of the new pizzeria, he and the other animatronics got dismantled by their killer. His soul, along with the others, was presumably set free, as evidenced by the good ending.",
-  'Description for Chica',
-  'Description for Foxy'
+  'Chica the Chicken, also known as Chica, is one of the four original animatronics of Freddy Fazbears Pizza and a major antagonist in the Five Nights at Freddys series.Chica is an animatronic chicken and the backup singer in Freddys band, positioned at the right side of the stage. Undisclosed to Fazbear Entertainment, Inc. and the public, Chica is possessed by the restless spirit of Susie – a little girl murdered by William Afton. Due to this, she and the others are now seeking revenge against their killer by attacking any adults in the pizzeria after-hours in blind rage.',
+  'Foxy the Pirate, also known as Foxy, is one of the four original animatronics of Freddy Fazbears Pizza and a major antagonist in the Five Nights at Freddys series. Foxy is a discontinued animatronic pirate fox entertainer. He resides at his own separate stage in the pizzeria. Undisclosed to Fazbear Entertainment, Inc. and the public, Foxy is possessed by the restless spirit of Fritz – a little boy murdered by William Afton. Due to this, he and the others are now seeking revenge against their killer by attacking any adults in the pizzeria after-hours in blind rage.'
 ];
+
+const jumpscares = [
+  'https://www.youtube.com/embed/FUaaGInT_R8?autoplay=1',
+  'https://www.youtube.com/embed/vVT2MUHRe_k?autoplay=1',
+  'https://www.youtube.com/embed/FuxA-t-pIdk?autoplay=1',
+  'https://www.youtube.com/embed/m0DQft9j3SY?autoplay=1'
+];
+
+const jumpscareDurations = [8000, 18000, 37000, 37000]; // video durations for each jumpscare, iframe closes automatically after jumpscare duration
+
+const pissFreddyJumpscare = 'https://www.youtube.com/embed/3ez4-CY30fM?autoplay=1';
+const pissFreddyDuration = 31000;
 
 
 let current = 0; // will use same pointer for both arrays cuz same length and order
@@ -104,7 +124,7 @@ function loadModel() {
     if (infoEl) {
       infoEl.textContent = 'Animatronic: ' + displayName;
     }
-    const descEl = document.getElementById('description');
+    const descEl = document.getElementById('content');
     if (descEl) {
       // :p
       if (displayName === 'Piss Freddy') {
@@ -112,6 +132,7 @@ function loadModel() {
       } else {
         descEl.textContent = desc[current] || '';
       }
+      descEl.style.display = 'none';
     }
 
     cam.position.set(0, verticalOffset, Math.max(10, sph.radius * 3));
@@ -123,6 +144,24 @@ function loadModel() {
     console.error(error);
   });
 }
+
+
+function showDesc() {
+  const descEl = document.getElementById('content');
+  const button = document.getElementById('showDesc');
+  if (descEl && button) {
+    if (descEl.style.display === 'none') {
+      descEl.style.display = 'block';
+      button.textContent = 'Hide Description';
+    } else {
+      descEl.style.display = 'none';
+      button.textContent = 'Show Description';
+    }
+  }
+}
+
+const showDescBtn = document.getElementById('showDesc');
+if (showDescBtn) showDescBtn.addEventListener('click', showDesc);
 
 const nextBtn = document.getElementById('next');
 if (nextBtn) nextBtn.addEventListener('click', () => {
@@ -137,18 +176,40 @@ if (prevBtn) prevBtn.addEventListener('click', () => {
   loadModel();
 });
 
+const jumpBtn = document.getElementById('jumpscare');
+const jumpFrame = document.getElementById('jumpframe');
+if (jumpBtn && jumpFrame) {
+  jumpBtn.addEventListener('click', () => {
+    const infoEl = document.getElementById('info');
+    const isPiss = infoEl && infoEl.textContent.includes('Piss Freddy');
+    const url = isPiss ? pissFreddyJumpscare : jumpscares[current];
+    const duration = isPiss ? pissFreddyDuration : jumpscareDurations[current];
+    jumpFrame.src = url;
+    jumpFrame.style.display = 'block';
+    setTimeout(() => {
+      jumpFrame.style.display = 'none';
+      jumpFrame.src = '';
+    }, duration);  });
+}
+
+if (jumpFrame) {
+  jumpFrame.addEventListener('click', () => {
+    jumpFrame.style.display = 'none';
+    jumpFrame.src = '';
+  });
+}
+
 
 document.addEventListener('keydown', function(event) {
     console.log('Key pressed: ' + event.key);
-    // You can also check for specific keys, e.g., the "Enter" key
-    if (event.key === 'ArrowRight') {
+    if (event.key === 'ArrowRight' || event.key === "d") {
         current = (current + 1) % models.length;
         loadModel();
     }
 });
 
 document.addEventListener('keydown', function (event) {
-    if (event.key === 'ArrowLeft') {
+    if (event.key === 'ArrowLeft' || event.key === 'a') {
       current = (current -1 + models.length) % models.length;
       loadModel();
     }
