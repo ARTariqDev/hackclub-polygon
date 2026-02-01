@@ -56,7 +56,7 @@ body {
 }
 
 #jumpscare:hover {
-  background: #dc143c;
+  background: #dc143c;  /* Slightly lighter crimson on hover */
 }
 
 #showDesc {
