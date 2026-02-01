@@ -71,7 +71,7 @@ const pissFreddyJumpscare = 'https://www.youtube.com/embed/3ez4-CY30fM?autoplay=
 const pissFreddyDuration = 31000;
 
 
-let current = 0; // will use same pointer for both arrays cuz same length and order
+let current = 0; // will use same pointer for arrays cuz same length and order
 let activeModel = null;
 
 function loadModel() {
